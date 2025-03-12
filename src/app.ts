@@ -1,22 +1,15 @@
-// import express from 'express';
-// import cors from 'cors';
-// import morgan from 'morgan';
-// import { TwitterClient } from './services/twitterClient';
-// import { config } from './schemas/config';
-// import multer from 'multer';
+
+import { TwitterClient } from './services/twitterClient';
+import { Server } from './server';
 
 
 
-// const app = express();
-// const port = 8080;
-
-
-
-
-// async function main(){
-//     const client = new TwitterClient(config);
-//     await client.init();
-// }
+async function main(){
+    const client = TwitterClient.getInstance();
+    await client.init();
+    const server = new Server();
+    server.listen()
+}
 
 
 // // client.client.sendTweet('Hello world');
@@ -43,10 +36,7 @@
 //   console.log(`Example app listening on port ${port}`);
 // })
 
-// main().catch(console.error);
+main().catch(console.error);
 
-import { Server } from './server';
 
-const server = new Server();
 
-server.listen()
