@@ -1,14 +1,10 @@
 import { Router } from 'express';
-// import { userController } from '../controllers';
-// import { accessTokenAuth } from '../middlewares/jwtAuth';
+import { TwitterController } from '../controllers';
 
 const router = Router();
+const twitterController = new TwitterController();
 
-router.post('/', (req, res) => {
-  res.status(200).json({
-    name: 'API'
-  });
-});
+router.post('/', twitterController.postTweet );
 
 
 export default router;

@@ -1,15 +1,14 @@
 import { Scraper } from "agent-twitter-client";
-import { TwitterConfig } from "../schemas/config";
+import { config, TwitterConfig } from "../schemas/config";
 
-import fs from 'fs';
 export class TwitterClient {
     twitterClient: Scraper;
     twitterConfig: TwitterConfig;
 
 
-    constructor(twitterConfig: TwitterConfig) {
-        this.twitterConfig = twitterConfig;
+    constructor() {
         this.twitterClient = new Scraper();
+        this.twitterConfig = config;
     }
 
 
@@ -75,7 +74,7 @@ export class TwitterClient {
         }
     }
 
-    async sendTweet(tweet: string, image: Buffer) {
+    async sendTweet(tweet: string, image?: Buffer) {
         const mediaData = [
             {
               data: image,
@@ -84,21 +83,22 @@ export class TwitterClient {
         ];
           
 
-        await this.twitterClient.sendTweet(tweet, undefined, mediaData );
+        const response = await this.twitterClient.sendTweet(tweet );
+        console.log(response);
     }
 
 
-    private async setCookiesFromArray(cookiesArray: any[]) {
-        const cookieStrings = cookiesArray.map(
-            (cookie) =>
-                `${cookie.key}=${cookie.value}; Domain=${cookie.domain}; Path=${cookie.path}; ${
-                    cookie.secure ? "Secure" : ""
-                }; ${cookie.httpOnly ? "HttpOnly" : ""}; SameSite=${
-                    cookie.sameSite || "Lax"
-                }`
-        );
-        await this.twitterClient.setCookies(cookieStrings);
-    }
+    // private async setCookiesFromArray(cookiesArray: any[]) {
+    //     const cookieStrings = cookiesArray.map(
+    //         (cookie) =>
+    //             `${cookie.key}=${cookie.value}; Domain=${cookie.domain}; Path=${cookie.path}; ${
+    //                 cookie.secure ? "Secure" : ""
+    //             }; ${cookie.httpOnly ? "HttpOnly" : ""}; SameSite=${
+    //                 cookie.sameSite || "Lax"
+    //             }`
+    //     );
+    //     await this.twitterClient.setCookies(cookieStrings);
+    // }
 
     // private  async getCachedCookies(username: string) {
     //     return await this.runtime.cacheManager.get<any[]>(
