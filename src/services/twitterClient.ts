@@ -25,6 +25,34 @@ export class TwitterClient {
         let retries = 3;
         const twitter2faSecret = this.twitterConfig.TWITTER_2FA_SECRET;
 
+
+        const cookieStrings = [
+          {
+            key: "auth_token",
+            value: this.twitterConfig.TWITTER_AUTH_TOKEN,
+            domain: ".twitter.com",
+          },
+          {
+            key: "ct0",
+            value: this.twitterConfig.TWITTER_CT0,
+            domain: ".twitter.com",
+          },
+          {
+            key: "guest_id",
+            value: this.twitterConfig.TWITTER_GUEST_ID,
+            domain: ".twitter.com",
+          },
+        ].map(
+          (cookie: any) =>
+            `${cookie.key}=${cookie.value}; Domain=${cookie.domain}; Path=${
+              cookie.path
+            }; ${cookie.secure ? "Secure" : ""}; ${
+              cookie.httpOnly ? "HttpOnly" : ""
+            }; SameSite=${cookie.sameSite || "Lax"}`
+        );
+        
+        
+         await this.twitterClient.setCookies(cookieStrings);
         if (!username) {
             throw new Error("Twitter username not configured");
         }
@@ -68,15 +96,15 @@ export class TwitterClient {
         }
     }
 
-    async sendTweet(tweet: string, image?: Buffer) {
-        const mediaData = [
-            {
-              data: image,
-              mediaType: 'image/jpeg'
-            }
-        ];
+    // public sendTweet(tweet: string, image?: Buffer) {
+    //     const mediaData = [
+    //         {
+    //           data: image,
+    //           mediaType: 'image/jpeg'
+    //         }
+    //     ];
 
-        const response = await this.twitterClient.sendTweet(tweet);
-        console.log(response);
-    }
+    //     const response = await this.twitterClient.sendTweet(tweet);
+    //     console.log(response);
+    // }
 }

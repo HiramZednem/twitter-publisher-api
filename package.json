@@ -6,7 +6,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon",
     "build": "rimraf ./dist && tsc",
-    "start": "npm run build && node dist/app.js"
+    "start": "npm run build && node dist/app.js",
+    "docker:build": "docker build -t twitter-publisher-api .",
+    "docker:run": "docker run -p 3000:3000 twitter-publisher-api"
   },
   "keywords": [],
   "author": "",

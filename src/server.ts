@@ -15,7 +15,7 @@ export class Server {
   }
 
   configuration(){
-    this.app.set('port', 3000);
+    this.app.set('port', 8080);
   }
 
   middlewares(){

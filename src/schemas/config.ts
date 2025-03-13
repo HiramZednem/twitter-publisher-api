@@ -9,6 +9,9 @@ const twitterEnvSchema = z.object({
   TWITTER_PASSWORD: z.string().min(1, "Twitter password is required"),
   TWITTER_EMAIL: z.string().email("Valid Twitter email is required"),
   TWITTER_2FA_SECRET: z.string().optional(),
+  TWITTER_AUTH_TOKEN: z.string().min(1, "Twitter auth token is required"),
+  TWITTER_CT0: z.string().min(1, "Twitter CT0 is required"),
+  TWITTER_GUEST_ID: z.string().min(1, "Twitter guest ID is required"),
 });
 
 /**
