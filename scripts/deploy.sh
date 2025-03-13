@@ -12,8 +12,6 @@ gcloud run deploy $SERVICE_NAME \
   --project $PROJECT_ID \
   --region $REGION \
   --allow-unauthenticated \
-  --memory "8Gi" \
-  --cpu "8" 
 
 # Check deployment status
 if [ $? -eq 0 ]; then

@@ -96,15 +96,25 @@ export class TwitterClient {
         }
     }
 
-    // public sendTweet(tweet: string, image?: Buffer) {
-    //     const mediaData = [
-    //         {
-    //           data: image,
-    //           mediaType: 'image/jpeg'
-    //         }
-    //     ];
+    public async sendTweet(tweet: string, image?: Buffer, mimetype?: string) {
+        let response: Response;
 
-    //     const response = await this.twitterClient.sendTweet(tweet);
-    //     console.log(response);
-    // }
+        if (image && mimetype) {
+            const mediaData = [
+                {
+                data: image,
+                mediaType: mimetype
+                }
+            ];
+            response = await this.twitterClient.sendTweet(tweet, undefined, mediaData);
+        } else {
+            response = await this.twitterClient.sendTweet(tweet);
+        }
+
+        // response.tweet
+
+        // console.log(response);
+        
+        return "jala";
+    }
 }
