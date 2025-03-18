@@ -3,11 +3,11 @@ import { config, TwitterConfig } from "../schemas/config";
 
 export class TwitterClient {
     private static instance: TwitterClient;
-    twitterClient: Scraper;
+    client: Scraper;
     twitterConfig: TwitterConfig;
 
     private constructor() {
-        this.twitterClient = new Scraper();
+        this.client = new Scraper();
         this.twitterConfig = config;
     }
 
@@ -52,7 +52,7 @@ export class TwitterClient {
         );
         
         
-         await this.twitterClient.setCookies(cookieStrings);
+         await this.client.setCookies(cookieStrings);
         if (!username) {
             throw new Error("Twitter username not configured");
         }
@@ -60,17 +60,17 @@ export class TwitterClient {
         console.log("Waiting for Twitter login");
         while (retries > 0) {
             try {
-                if (await this.twitterClient.isLoggedIn()) {
+                if (await this.client.isLoggedIn()) {
                     console.info("Successfully logged in.");
                     break;
                 } else {
-                    await this.twitterClient.login(
+                    await this.client.login(
                         username,
                         password,
                         email,
                         twitter2faSecret
                     );
-                    if (await this.twitterClient.isLoggedIn()) {
+                    if (await this.client.isLoggedIn()) {
                         console.info("Successfully logged in.");
                         console.info("Caching cookies");
                         break;
@@ -106,9 +106,9 @@ export class TwitterClient {
                 mediaType: mimetype
                 }
             ];
-            response = await this.twitterClient.sendTweet(tweet, undefined, mediaData);
+            response = await this.client.sendTweet(tweet, undefined, mediaData);
         } else {
-            response = await this.twitterClient.sendTweet(tweet);
+            response = await this.client.sendTweet(tweet);
         }
 
         // response.tweet
