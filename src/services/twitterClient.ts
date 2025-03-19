@@ -64,17 +64,22 @@ export class TwitterClient {
                     console.info("Successfully logged in.");
                     break;
                 } else {
-                    await this.client.login(
-                        username,
-                        password,
-                        email,
-                        twitter2faSecret
-                    );
-                    if (await this.client.isLoggedIn()) {
-                        console.info("Successfully logged in.");
-                        console.info("Caching cookies");
-                        break;
-                    }
+                    // Hola: este trozo de codigo se encarga de hacer el login en twitter,
+                    // para no arriesgar la cuenta de twitter, se usan mejor las cookies,
+                    // a futuro hay que implementar un gestor de cookies para evitar problemas
+
+                    // await this.client.login(
+                    //     username,
+                    //     password,
+                    //     email,
+                    //     twitter2faSecret
+                    // );
+                    // if (await this.client.isLoggedIn()) {
+                    //     console.info("Successfully logged in.");
+                    //     console.info("Caching cookies");
+                    //     break;
+                    // }
+                    throw new Error("Twitter login with cookies failed");
                 }
             } catch (error) {
                 console.error(`Login attempt failed: ${error}`);
