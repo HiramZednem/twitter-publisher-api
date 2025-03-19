@@ -7,6 +7,10 @@
     "dev": "nodemon",
     "build": "rimraf ./dist && tsc",
     "start": "npm run build && node dist/app.js",
+    "start:pm2": "pm2 start dist/app.js --name twitter-publisher-api",
+    "pm2:restart": "pm2 restart twitter-publisher-api",
+    "pm2:stop": "pm2 stop twitter-publisher-api",
+    "pm2:logs": "pm2 logs twitter-publisher-api",
     "docker:build": "docker build -t twitter-publisher-api .",
     "docker:run": "docker run -p 3000:3000 twitter-publisher-api"
   },
