@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { TwitterClient } from '../services/twitterClient';
+import logger from '../services/loggerService';
 
 export class TwitterController {
   private twitterService: TwitterClient;
@@ -13,7 +14,7 @@ export class TwitterController {
       const { text } = req.body;
 
       if (!text) {
-        res.status(400).json({ error: "No text provided", status: false });
+        res.status(400).json({ error: "No text provided", success: false });
         return;
       }
 
@@ -28,7 +29,7 @@ export class TwitterController {
         ];
 
         if (!supportedTypes.includes(mimetype)) {
-          res.status(400).json({ error: "Unsupported file type. Only .jpg, .jpeg, .png, .gif and .mp4 formats are allowed.", status: false });
+          res.status(400).json({ error: "Unsupported file type. Only .jpg, .jpeg, .png, .gif and .mp4 formats are allowed.", success: false });
           return;
         }
 
@@ -37,14 +38,20 @@ export class TwitterController {
           buffer,
           mimetype
         );
-        res.status(200).json({ media: media });
+        res.status(200).json({
+          success: true,
+          message: "Tweet enviado con éxito",
+        });
       } else {
         const tweet = await this.twitterService.sendTweet(text);
-        res.status(200).json({ tweet: tweet });
+        res.status(200).json({
+          success: true,
+          message: "Tweet enviado con éxito",
+        });
       }
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: error, status: false });
+      logger.error(error);
+      res.status(500).json({ message: error, success: false });
     }
   }
 }

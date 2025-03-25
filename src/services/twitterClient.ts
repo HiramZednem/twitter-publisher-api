@@ -38,6 +38,7 @@ export class TwitterClient {
         }
 
         if (!username) {
+            logger.error("Twitter username not configured");
             throw new Error("Twitter username not configured");
         }
 
@@ -85,25 +86,32 @@ export class TwitterClient {
     }
 
     public async sendTweet(tweet: string, image?: Buffer, mimetype?: string) {
-        let response: Response;
+        try {
+            let response: Response;
 
-        if (image && mimetype) {
-            const mediaData = [
-                {
-                data: image,
-                mediaType: mimetype
-                }
-            ];
-            response = await this.client.sendTweet(tweet, undefined, mediaData);
-        } else {
-            response = await this.client.sendTweet(tweet);
+            if (image && mimetype) {
+                const mediaData = [
+                    {
+                    data: image,
+                    mediaType: mimetype
+                    }
+                ];
+                response = await this.client.sendTweet(tweet, undefined, mediaData);
+            } else {
+                response= await this.client.sendTweet(tweet).then(response => response.json());
+
+            }
+            
+            return { 
+                success: response.ok,
+                status: response.status,
+                message: response.ok ? "Tweet enviado con éxito" : "Error al enviar tweet",
+            };
+        } catch (error) {
+            logger.error(`Failed to send tweet: ${error}`);
+            throw new Error("Failed to send tweet");
         }
-
-        // response.tweet
-
-        // console.log(response);
         
-        return "jala";
     }
 
     private async setCookiesFromArray(cookiesArray: any[]) {
