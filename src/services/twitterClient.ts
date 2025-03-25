@@ -1,14 +1,18 @@
 import { Scraper } from "agent-twitter-client";
 import { config, TwitterConfig } from "../schemas/config";
+import logger from "./loggerService";
+import { CacheManager } from "./cacheManager";
 
 export class TwitterClient {
     private static instance: TwitterClient;
     client: Scraper;
     twitterConfig: TwitterConfig;
+    cacheManager: CacheManager;
 
     private constructor() {
         this.client = new Scraper();
         this.twitterConfig = config;
+        this.cacheManager = new CacheManager();
     }
 
     public static getInstance(): TwitterClient {
@@ -19,79 +23,58 @@ export class TwitterClient {
     }
 
     async init() {
+        logger.info("Initializing Twitter client");
         const username = this.twitterConfig.TWITTER_USERNAME;
         const password = this.twitterConfig.TWITTER_PASSWORD;
         const email = this.twitterConfig.TWITTER_EMAIL;
         let retries = 3;
         const twitter2faSecret = this.twitterConfig.TWITTER_2FA_SECRET;
 
+        const cookies = await this.cacheManager.get("cookies");
+        
+        if (Array.isArray(cookies)) {
+            logger.info("Using cached cookies");
+            await this.setCookiesFromArray(cookies);
+        }
 
-        const cookieStrings = [
-          {
-            key: "auth_token",
-            value: this.twitterConfig.TWITTER_AUTH_TOKEN,
-            domain: ".twitter.com",
-          },
-          {
-            key: "ct0",
-            value: this.twitterConfig.TWITTER_CT0,
-            domain: ".twitter.com",
-          },
-          {
-            key: "guest_id",
-            value: this.twitterConfig.TWITTER_GUEST_ID,
-            domain: ".twitter.com",
-          },
-        ].map(
-          (cookie: any) =>
-            `${cookie.key}=${cookie.value}; Domain=${cookie.domain}; Path=${
-              cookie.path
-            }; ${cookie.secure ? "Secure" : ""}; ${
-              cookie.httpOnly ? "HttpOnly" : ""
-            }; SameSite=${cookie.sameSite || "Lax"}`
-        );
-        
-        
-         await this.client.setCookies(cookieStrings);
         if (!username) {
             throw new Error("Twitter username not configured");
         }
 
-        console.log("Waiting for Twitter login");
+        logger.info("Waiting for Twitter login");
         while (retries > 0) {
             try {
                 if (await this.client.isLoggedIn()) {
-                    console.info("Successfully logged in.");
+                    logger.info("Successfully logged in with cookies.");
                     break;
                 } else {
-                    // Hola: este trozo de codigo se encarga de hacer el login en twitter,
-                    // para no arriesgar la cuenta de twitter, se usan mejor las cookies,
-                    // a futuro hay que implementar un gestor de cookies para evitar problemas
 
-                    // await this.client.login(
-                    //     username,
-                    //     password,
-                    //     email,
-                    //     twitter2faSecret
-                    // );
-                    // if (await this.client.isLoggedIn()) {
-                    //     console.info("Successfully logged in.");
-                    //     console.info("Caching cookies");
-                    //     break;
-                    // }
+                    await this.client.login(
+                        username,
+                        password,
+                        email,
+                        twitter2faSecret
+                    );
+                    if (await this.client.isLoggedIn()) {
+                        logger.info("Successfully logged in manually.");
+                        logger.info("Caching cookies");
+
+                        await this.parseAndSetCookies(await this.client.getCookies(), "cookies");
+                        break;
+                    }
                     throw new Error("Twitter login with cookies failed");
                 }
             } catch (error) {
-                console.error(`Login attempt failed: ${error}`);
+                logger.error(`Login attempt failed: ${error}`);
             }
 
             retries--;
-            console.error(
+            logger.error(
                 `Failed to login to Twitter. Retrying... (${retries} attempts left)`
             );
 
             if (retries === 0) {
-                console.error(
+                logger.error(
                     "Max retries reached. Exiting login process."
                 );
                 throw new Error("Twitter login failed after maximum retries.");
@@ -121,5 +104,39 @@ export class TwitterClient {
         // console.log(response);
         
         return "jala";
+    }
+
+    private async setCookiesFromArray(cookiesArray: any[]) {
+        const cookieStrings = cookiesArray.map(
+            (cookie) =>
+                `${cookie.cookie_key}=${cookie.cookie_value}; Domain=${cookie.domain}; Path=${cookie.path}; ${
+                    cookie.secure ? "Secure" : ""
+                }; ${cookie.httpOnly ? "HttpOnly" : ""}; SameSite=${
+                    cookie.sameSite || "Lax"
+                }`
+        );
+        await this.client.setCookies(cookieStrings);
+    }
+
+    private async parseAndSetCookies(cookies: any[], username: string) {
+        const parsedCookies = cookies.map((cookie) => {
+            if (typeof cookie !== 'object' || cookie === null) {
+                throw new Error('Cookie is not an object: ' + JSON.stringify(cookie));
+            }
+    
+            const { key, value, domain, path, secure, httpOnly, sameSite } = cookie;
+    
+            return {
+                key: key.trim(),
+                value: value.trim(),
+                domain: domain || ".twitter.com",  // Default domain if not provided
+                path: path || "/",  // Default path if not provided
+                secure: secure || false,
+                httpOnly: httpOnly || false,
+                sameSite: sameSite || "Lax",  // Default SameSite if not provided
+            };
+        });
+    
+        await this.cacheManager.set(username, parsedCookies);
     }
 }
